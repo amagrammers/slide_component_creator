@@ -1,0 +1,167 @@
+<Window x:Class="SlideComponentCreator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="スライド部品作成ツール" Width="1020" Height="780" MinWidth="860" MinHeight="680">
+    <Window.Resources>
+        <DrawingBrush x:Key="Checker" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="White"><GeometryDrawing.Geometry><RectangleGeometry Rect="0,0,16,16"/></GeometryDrawing.Geometry></GeometryDrawing>
+                    <GeometryDrawing Brush="#E4E4E4"><GeometryDrawing.Geometry><GeometryGroup>
+                        <RectangleGeometry Rect="0,0,8,8"/><RectangleGeometry Rect="8,8,8,8"/>
+                    </GeometryGroup></GeometryDrawing.Geometry></GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+        <Style TargetType="TextBlock" x:Key="Label"><Setter Property="VerticalAlignment" Value="Center"/></Style>
+        <Style TargetType="TextBox"><Setter Property="Padding" Value="3"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.Column="0" Margin="8">
+            <TextBlock DockPanel.Dock="Top" Text="大分類" FontWeight="Bold" Margin="0,0,0,4"/>
+            <ListBox x:Name="CategoryList" SelectionChanged="CategoryList_SelectionChanged" FontSize="14"/>
+        </DockPanel>
+        <DockPanel Grid.Column="1" Margin="0,8,8,8">
+            <TextBlock DockPanel.Dock="Top" Text="小分類" FontWeight="Bold" Margin="0,0,0,4"/>
+            <ListBox x:Name="SubCategoryList" SelectionChanged="SubCategoryList_SelectionChanged" FontSize="14"/>
+        </DockPanel>
+
+        <Grid Grid.Column="2" Margin="0,8,8,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderBrush="#BBB" BorderThickness="1" ClipToBounds="True"
+                    Background="#0B1220" x:Name="PreviewBackground">
+                <Viewbox Stretch="Uniform" Margin="8" StretchDirection="DownOnly">
+                    <!-- Canvas1: 出力対象。発光や線がはみ出す分の余白を含む -->
+                    <Grid x:Name="Canvas1">
+                        <Grid x:Name="Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path x:Name="ShapePath" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                <Path.Effect>
+                                    <DropShadowEffect x:Name="Glow" ShadowDepth="0" BlurRadius="0" Opacity="0" Color="#00D5FF"/>
+                                </Path.Effect>
+                            </Path>
+                        </Grid>
+                    </Grid>
+                </Viewbox>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 0: 図形 / 塗りモード -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="図形 " Style="{StaticResource Label}"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" x:Name="ShapeCombo" Margin="0,3" SelectionChanged="ShapeCombo_SelectionChanged"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="塗り " Style="{StaticResource Label}"/>
+                <ComboBox Grid.Row="0" Grid.Column="4" x:Name="FillModeCombo" Margin="0,3" SelectedIndex="0" SelectionChanged="Setting_Selection">
+                    <ComboBoxItem Content="塗りつぶさない"/>
+                    <ComboBoxItem Content="単色"/>
+                    <ComboBoxItem Content="グラデーション"/>
+                </ComboBox>
+
+                <!-- 1: 幅 / 塗り色1 -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="幅 (px) " Style="{StaticResource Label}"/>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="WidthBox" Margin="0,3" TextChanged="Setting_Changed"/>
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="塗り色1 " Style="{StaticResource Label}"/>
+                <DockPanel Grid.Row="1" Grid.Column="4" Margin="0,3">
+                    <Border x:Name="Fill1Swatch" DockPanel.Dock="Left" Width="24" Margin="0,0,6,0" BorderBrush="#888" BorderThickness="1"/>
+                    <TextBox x:Name="Fill1Box" Text="#2F6FDE" TextChanged="Setting_Changed" GotKeyboardFocus="ColorBox_Focus"/>
+                </DockPanel>
+
+                <!-- 2: 高さ / 塗り色2 -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="高さ (px) " Style="{StaticResource Label}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="HeightBox" Margin="0,3" TextChanged="Setting_Changed"/>
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="塗り色2 " Style="{StaticResource Label}"/>
+                <DockPanel Grid.Row="2" Grid.Column="4" Margin="0,3">
+                    <Border x:Name="Fill2Swatch" DockPanel.Dock="Left" Width="24" Margin="0,0,6,0" BorderBrush="#888" BorderThickness="1"/>
+                    <TextBox x:Name="Fill2Box" Text="#2F6FDE" TextChanged="Setting_Changed" GotKeyboardFocus="ColorBox_Focus"/>
+                </DockPanel>
+
+                <!-- 3: 調整 / グラデ角度 -->
+                <TextBlock Grid.Row="3" Grid.Column="0" x:Name="AdjustLabel" Text="調整 " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="3" Grid.Column="1" x:Name="AdjustSlider" Minimum="0" Maximum="1" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+                <TextBlock Grid.Row="3" Grid.Column="3" Text="グラデ角度 " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="3" Grid.Column="4" x:Name="AngleSlider" Minimum="0" Maximum="360" Value="90" SmallChange="5" LargeChange="45" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+
+                <!-- 4: 線の色 / 開始の不透明度 -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="線の色 " Style="{StaticResource Label}"/>
+                <DockPanel Grid.Row="4" Grid.Column="1" Margin="0,3">
+                    <Border x:Name="StrokeSwatch" DockPanel.Dock="Left" Width="24" Margin="0,0,6,0" BorderBrush="#888" BorderThickness="1"/>
+                    <TextBox x:Name="StrokeBox" Text="#00D5FF" ToolTip="発光もこの色になります" TextChanged="Setting_Changed" GotKeyboardFocus="ColorBox_Focus"/>
+                </DockPanel>
+                <TextBlock Grid.Row="4" Grid.Column="3" Text="開始の不透明度 " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="4" Grid.Column="4" x:Name="StartOpacitySlider" Minimum="0" Maximum="100" Value="100" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+
+                <!-- 5: 線の幅 / 終了の不透明度 -->
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="線の幅 " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="5" Grid.Column="1" x:Name="StrokeWidthSlider" Minimum="0" Maximum="40" Value="4" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+                <TextBlock Grid.Row="5" Grid.Column="3" Text="終了の不透明度 " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="5" Grid.Column="4" x:Name="EndOpacitySlider" Minimum="0" Maximum="100" Value="0" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+
+                <!-- 6: 発光の広がり / 塗る範囲 -->
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="発光の広がり " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="6" Grid.Column="1" x:Name="GlowRadiusSlider" Minimum="0" Maximum="80" Value="16" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+                <TextBlock Grid.Row="6" Grid.Column="3" Text="塗る範囲 (%) " Style="{StaticResource Label}" ToolTip="グラデーションの開始側から何%まで塗るか。残りは透明"/>
+                <Slider Grid.Row="6" Grid.Column="4" x:Name="RangeSlider" Minimum="1" Maximum="100" Value="100" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+
+                <!-- 7: 発光の強さ / 色の候補 -->
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="発光の強さ " Style="{StaticResource Label}"/>
+                <Slider Grid.Row="7" Grid.Column="1" x:Name="GlowStrengthSlider" Minimum="0" Maximum="1" Value="1" Margin="0,3" VerticalAlignment="Center" ValueChanged="Setting_Slider"/>
+                <TextBlock Grid.Row="7" Grid.Column="3" Text="色の候補 " Style="{StaticResource Label}"/>
+                <WrapPanel Grid.Row="7" Grid.Column="4" x:Name="PresetPanel" Margin="0,3" ToolTip="最後に選んだ色欄に適用されます"/>
+
+                <!-- 8: 出力 -->
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="出力倍率 " Style="{StaticResource Label}"/>
+                <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" Margin="0,3">
+                    <ComboBox x:Name="ScaleCombo" Width="70" SelectedIndex="1">
+                        <ComboBoxItem Content="1x"/><ComboBoxItem Content="2x"/><ComboBoxItem Content="3x"/><ComboBoxItem Content="4x"/>
+                    </ComboBox>
+                </StackPanel>
+                <CheckBox Grid.Row="8" Grid.Column="3" Grid.ColumnSpan="2" x:Name="TransparentCheck" Content="背景を透過して保存する" IsChecked="True" VerticalAlignment="Center"/>
+
+                <!-- 9: プレビュー背景 -->
+                <TextBlock Grid.Row="9" Grid.Column="0" Text="プレビュー背景 " Style="{StaticResource Label}"/>
+                <ComboBox Grid.Row="9" Grid.Column="1" x:Name="PreviewBgCombo" Margin="0,3" SelectedIndex="0" SelectionChanged="PreviewBg_Changed" ToolTip="画面表示だけに影響します">
+                    <ComboBoxItem Content="濃紺"/><ComboBoxItem Content="黒"/><ComboBoxItem Content="白"/><ComboBoxItem Content="市松（透過）"/>
+                </ComboBox>
+                <TextBlock Grid.Row="9" Grid.Column="3" Text="囲み " Style="{StaticResource Label}"/>
+                <ComboBox Grid.Row="9" Grid.Column="4" x:Name="EnclosureCombo" Margin="0,3" SelectedIndex="0" SelectionChanged="Setting_Selection" ToolTip="アイコンの周りを枠で囲みます">
+                    <ComboBoxItem Content="なし"/><ComboBoxItem Content="丸"/><ComboBoxItem Content="角丸四角"/><ComboBoxItem Content="四角"/>
+                </ComboBox>
+
+                <StackPanel Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="5" x:Name="SidesPanel" Orientation="Horizontal" Margin="0,3" Visibility="Collapsed">
+                    <TextBlock Text="ピースの形　上 " Style="{StaticResource Label}"/>
+                    <ComboBox x:Name="SideTop" Width="60" SelectedIndex="0" SelectionChanged="Setting_Selection"><ComboBoxItem Content="凸"/><ComboBoxItem Content="凹"/><ComboBoxItem Content="平"/></ComboBox>
+                    <TextBlock Text="　右 " Style="{StaticResource Label}"/>
+                    <ComboBox x:Name="SideRight" Width="60" SelectedIndex="0" SelectionChanged="Setting_Selection"><ComboBoxItem Content="凸"/><ComboBoxItem Content="凹"/><ComboBoxItem Content="平"/></ComboBox>
+                    <TextBlock Text="　下 " Style="{StaticResource Label}"/>
+                    <ComboBox x:Name="SideBottom" Width="60" SelectedIndex="1" SelectionChanged="Setting_Selection"><ComboBoxItem Content="凸"/><ComboBoxItem Content="凹"/><ComboBoxItem Content="平"/></ComboBox>
+                    <TextBlock Text="　左 " Style="{StaticResource Label}"/>
+                    <ComboBox x:Name="SideLeft" Width="60" SelectedIndex="1" SelectionChanged="Setting_Selection"><ComboBoxItem Content="凸"/><ComboBoxItem Content="凹"/><ComboBoxItem Content="平"/></ComboBox>
+                </StackPanel>
+
+                <Button Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="5" Content="PNGとして保存" Margin="0,8,0,0" Padding="0,8" FontSize="14" Click="Save_Click"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
